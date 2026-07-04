@@ -579,7 +579,8 @@
             circle.setAttribute("fill", "#ffffff");
             circle.setAttribute("stroke", corGrupo(node.grupo));
             circle.setAttribute("class", "node");
-
+            circle.style.strokeWidth = "8px";
+            circle.style.stroke = corGrupo(node.grupo);
             circle.addEventListener(
                 "click",
                 ()=> node.grupo === "Gênero"
