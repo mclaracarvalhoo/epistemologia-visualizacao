@@ -1314,8 +1314,8 @@ function criarRadarChart() {
                     borderColor: "#e2e6ea",
                     borderWidth: 1,
                     
-                    mode: 'nearest',     // 🌟 Foca apenas em 1 item
-                    intersect: true,     // 🌟 Só abre se o mouse tocar na bolinha
+                    mode: 'nearest',     // Foca apenas em 1 item
+                    intersect: true,     // Só abre se o mouse tocar na bolinha
                     position: 'cursor',  // Mantém o balão colado no ponteiro do mouse
                     
                     callbacks: {
