@@ -214,7 +214,8 @@ body{
 
 svg{
     width:100%;
-    height:640px;
+    height:auto;
+    max-height:760px;
     display:block;
 }
 
@@ -273,7 +274,7 @@ svg{
 
 .label{
     font-family:"Poppins",Arial,sans-serif;
-    font-size: 15px;
+    font-size:18px;
     font-weight:600;
     fill:var(--navy);
     text-anchor:middle;
@@ -283,7 +284,7 @@ svg{
 
 .group-title{
     font-family:"Montserrat",sans-serif;
-    font-size:22px;
+    font-size:30px;
     font-weight:800;
 }
 
@@ -431,7 +432,7 @@ svg{
         border-right:none;
         border-bottom:1px solid var(--line);
     }
-    svg, .chart-container{
-        height:520px;
+    .chart-container{
+        height:580px;
     }
 }
