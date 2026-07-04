@@ -10,6 +10,11 @@ const nodes = [];
 const edges = [];
 
 let chart;
+let chartDistribuicao;
+
+if(typeof ChartDataLabels !== "undefined"){
+    Chart.register(ChartDataLabels);
+}
 
 window.onload = async () => {
 
@@ -27,6 +32,8 @@ window.onload = async () => {
     document.getElementById("statTotal").textContent = dados.length;
 
     criarGrafico();
+
+    criarGraficoDistribuicao();
 
     gerarGrafo();
 
@@ -73,6 +80,9 @@ function criarGrafico(){
                             },
                             color:"#052f5c"
                         }
+                    },
+                    datalabels:{
+                        display:false
                     }
                 },
 
@@ -101,6 +111,98 @@ function criarGrafico(){
                             color:"#052f5c",
                             font:{ family:"Poppins", weight:600 }
                         }
+                    }
+                }
+            }
+        }
+    );
+
+}
+
+function criarGraficoDistribuicao(){
+
+    const cor = {
+        discorda:"#e2574c",
+        neutro:"#c9d3da",
+        concorda:"#0a85a7",
+        concordaForte:"#f8c133"
+    };
+
+    chartDistribuicao = new Chart(
+        document.getElementById("chartDistribuicao"),
+        {
+            type:"bar",
+
+            data:{
+                labels:["Bacon","Popper","Kuhn","Feyerabend"],
+                datasets:[
+                    {
+                        label:"Discorda (-2 a -0.4)",
+                        data:[],
+                        backgroundColor:cor.discorda,
+                        datalabels:{ color:"#ffffff" }
+                    },
+                    {
+                        label:"Neutro (-0.4 a 0.4)",
+                        data:[],
+                        backgroundColor:cor.neutro,
+                        datalabels:{ color:"#052f5c" }
+                    },
+                    {
+                        label:"Concorda (0.4 a 1.2)",
+                        data:[],
+                        backgroundColor:cor.concorda,
+                        datalabels:{ color:"#ffffff" }
+                    },
+                    {
+                        label:"Concorda Fortemente (1.2 a 2)",
+                        data:[],
+                        backgroundColor:cor.concordaForte,
+                        datalabels:{ color:"#052f5c" }
+                    }
+                ]
+            },
+
+            options:{
+                indexAxis:"y",
+                responsive:true,
+                maintainAspectRatio:false,
+
+                plugins:{
+                    legend:{
+                        position:"bottom",
+                        labels:{
+                            font:{ family:"Poppins", weight:600 },
+                            color:"#052f5c",
+                            boxWidth:14,
+                            padding:16
+                        }
+                    },
+                    datalabels:{
+                        formatter:(valor)=>
+                            valor >= 5 ? Math.round(valor) + "%" : "",
+                        font:{ family:"Poppins", weight:700, size:12 }
+                    }
+                },
+
+                scales:{
+                    x:{
+                        stacked:true,
+                        min:0,
+                        max:100,
+                        ticks:{
+                            color:"#052f5c",
+                            callback:(v)=> v + "%"
+                        },
+                        grid:{ color:"#e2e6ea" }
+                    },
+                    y:{
+                        stacked:true,
+                        ticks:{
+                            color:"#052f5c",
+                            font:{ family:"Poppins", weight:700 }
+                        },
+                        grid:{ display:false }
                     }
                 }
             }
@@ -627,10 +729,83 @@ function atualizarGrafico(){
 
     chart.update();
 
+    atualizarDistribuicao(filtrado);
+
     const statFiltered = document.getElementById("statFiltered");
 
     if(statFiltered){
         statFiltered.textContent = filtrado.length;
     }
+
+}
+
+function atualizarDistribuicao(filtrado){
+
+    if(!chartDistribuicao) return;
+
+    const autores = [
+        "Bacon",
+        "Popper",
+        "Kuhn",
+        "Feyerabend"
+    ];
+
+    const faixas = {
+        discorda:[],
+        neutro:[],
+        concorda:[],
+        concordaForte:[]
+    };
+
+    autores.forEach(autor=>{
+
+        let discorda = 0;
+        let neutro = 0;
+        let concorda = 0;
+        let concordaForte = 0;
+        let total = 0;
+
+        filtrado.forEach(linha=>{
+
+            const bruto = linha[autor];
+
+            if(bruto === undefined || bruto === null || bruto === "") return;
+
+            const valor =
+                parseFloat(String(bruto).replace(",","."));
+
+            if(isNaN(valor)) return;
+
+            total++;
+
+            if(valor < -0.4) discorda++;
+            else if(valor < 0.4) neutro++;
+            else if(valor < 1.2) concorda++;
+            else concordaForte++;
+        });
+
+        faixas.discorda.push(
+            total > 0 ? (discorda/total)*100 : 0
+        );
+
+        faixas.neutro.push(
+            total > 0 ? (neutro/total)*100 : 0
+        );
+
+        faixas.concorda.push(
+            total > 0 ? (concorda/total)*100 : 0
+        );
+
+        faixas.concordaForte.push(
+            total > 0 ? (concordaForte/total)*100 : 0
+        );
+    });
+
+    chartDistribuicao.data.datasets[0].data = faixas.discorda;
+    chartDistribuicao.data.datasets[1].data = faixas.neutro;
+    chartDistribuicao.data.datasets[2].data = faixas.concorda;
+    chartDistribuicao.data.datasets[3].data = faixas.concordaForte;
+
+    chartDistribuicao.update();
 
 }
