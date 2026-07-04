@@ -1253,7 +1253,7 @@ function desenharBoxplot(filtrado){
         ctx.strokeRect(xc - largCaixa/2, yTopo, largCaixa, yBase - yTopo);
 
         // linha da média
-        ctx.strokeStyle = "#f8c133";
+        ctx.strokeStyle = "#caff61";
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(xc - largCaixa/2, mapY(m));
@@ -1269,106 +1269,225 @@ function desenharBoxplot(filtrado){
 }
 
 /* ==========================================================
-   RADAR COMPARATIVO (Top 20% / Média / Bottom 20%)
+   RADAR COMPARATIVO (Estudantes / Professores / Funcionários)
    ========================================================== */
+   
+// 1. REGISTRA O SEGUIDOR DE CURSOR (Cole isso antes/fora da função criarRadarChart)
+if (Chart && Chart.Tooltip && !Chart.Tooltip.positioners.cursor) {
+    Chart.Tooltip.positioners.cursor = function(elements, eventPosition) {
+        return {
+            x: eventPosition.x + 25, // Joga o balão levemente para a direita da seta do mouse
+            y: eventPosition.y - 30  // Joga o balão levemente para cima da seta do mouse
+        };
+    };
+}
 
-let radarChart;
+// 2. O NOVO PLUGIN ATUALIZADO (Substitua o código do seu plugin por este)
+const regioesFundoPlugin = {
+    id: 'regioesFundo',
+    beforeDraw(chart) {
+        const { ctx, chartArea: { left, right, top, bottom }, scales: { r } } = chart;
+        const centerX = (left + right) / 2;
+        const centerY = (top + bottom) / 2;
+        const raioZero = r.getDistanceFromCenterForValue(0);  
+        const raioMax = r.getDistanceFromCenterForValue(2);   
 
-function criarRadarChart(){
+        ctx.save();
+        // Zona Vermelha
+        ctx.beginPath(); ctx.fillStyle = 'rgba(255, 99, 132, 0.11)';
+        ctx.arc(centerX, centerY, raioZero, 0, 2 * Math.PI); ctx.fill();
+        // Zona Verde
+        ctx.beginPath(); ctx.fillStyle = 'rgba(75, 192, 192, 0.11)';
+        ctx.arc(centerX, centerY, raioMax, 0, 2 * Math.PI, false);
+        ctx.arc(centerX, centerY, raioZero, 0, 2 * Math.PI, true); ctx.fill();
+        // Linha do Zero
+        ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.strokeStyle = '#052f5c';
+        ctx.lineWidth = 1.5; ctx.arc(centerX, centerY, raioZero, 0, 2 * Math.PI); ctx.stroke();
+        ctx.restore();
+    },
+    afterDraw(chart) {
+        const { ctx, chartArea: { left, right, top, bottom }, scales: { r } } = chart;
+        const centerX = (left + right) / 2;
+        const centerY = (top + bottom) / 2;
+        const raioZero = r.getDistanceFromCenterForValue(0);  
+        const raioMax = r.getDistanceFromCenterForValue(2);   
 
+        ctx.save();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = 'bold 10px Poppins, sans-serif';
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.lineJoin = 'round';
+        const espacamentoLinha = 12;
+
+        // 🌟 TEXTO CONCORDÂNCIA: Movido para a diagonal Superior-Esquerda (Espaço morto)
+        ctx.fillStyle = 'rgba(30, 123, 123, 0.75)';
+        const distConc = raioZero + (raioMax - raioZero) / 2;
+        const posXConc = centerX + Math.cos(Math.PI * 1.28) * distConc;
+        const posYConc = centerY + Math.sin(Math.PI * 1.28) * distConc;
+        ["REGIÃO DE", "CONCORDÂNCIA"].forEach((l, i) => {
+            const y = posYConc + (i * espacamentoLinha) - 6;
+            ctx.strokeText(l, posXConc, y); ctx.fillText(l, posXConc, y);
+        });
+
+        // 🌟 TEXTO DISCORDÂNCIA: Movido para a diagonal Inferior-Direita (Espaço morto)
+        ctx.fillStyle = 'rgba(179, 58, 83, 0.75)';
+        const distDisc = raioZero * 0.6;
+        const posXDisc = centerX + Math.cos(Math.PI * 0.28) * distDisc;
+        const posYDisc = centerY + Math.sin(Math.PI * 0.28) * distDisc;
+        ["REGIÃO DE", "DISCORDÂNCIA"].forEach((l, i) => {
+            const y = posYDisc + (i * espacamentoLinha) - 6;
+            ctx.strokeText(l, posXDisc, y); ctx.fillText(l, posXDisc, y);
+        });
+        ctx.restore();
+    }
+};
+
+// 3. INICIALIZAÇÃO DO CHART
+function criarRadarChart() {
     const canvasEl = document.getElementById("radarChart");
-
-    if(!canvasEl) return;
+    if (!canvasEl) return;
 
     radarChart = new Chart(canvasEl, {
-
-        type:"radar",
-
-        data:{
-            labels:["Bacon","Popper","Kuhn","Feyerabend"],
-            datasets:[
+        type: "radar",
+        data: {
+            labels: ["Bacon", "Popper", "Kuhn", "Feyerabend"],
+            datasets: [
                 {
-                    label:"Top 20%",
-                    data:[],
-                    backgroundColor:"rgba(46,204,113,0.15)",
-                    borderColor:"#2ecc71",
-                    pointBackgroundColor:"#2ecc71"
+                    label: "Estudantes", data: [], tension: 0.5, fill: false,
+                    borderColor: "#0a85a7", borderWidth: 3,
+                    pointBackgroundColor: "#ffffff", pointBorderColor: "#0a85a7", pointBorderWidth: 3,
+                    pointRadius: 6, pointHoverRadius: 8
                 },
                 {
-                    label:"Média",
-                    data:[],
-                    backgroundColor:"rgba(10,133,167,0.2)",
-                    borderColor:"#0a85a7",
-                    pointBackgroundColor:"#0a85a7"
+                    label: "Professores", data: [], tension: 0.5, fill: false,
+                    borderColor: "#f3b21a", borderWidth: 3,
+                    pointBackgroundColor: "#ffffff", pointBorderColor: "#f3b21a", pointBorderWidth: 3,
+                    pointRadius: 6, pointHoverRadius: 8
                 },
                 {
-                    label:"Bottom 20%",
-                    data:[],
-                    backgroundColor:"rgba(231,76,60,0.15)",
-                    borderColor:"#e74c3c",
-                    pointBackgroundColor:"#e74c3c"
+                    label: "Funcionários / Técnico-administrativos", data: [], tension: 0.5, fill: false,
+                    borderColor: "#6f4fd6", borderWidth: 3,
+                    pointBackgroundColor: "#ffffff", pointBorderColor: "#6f4fd6", pointBorderWidth: 3,
+                    pointRadius: 6, pointHoverRadius: 8
                 }
             ]
         },
-
-        options:{
-            responsive:true,
-            maintainAspectRatio:false,
-
-            plugins:{
-                legend:{
-                    position:"bottom",
-                    labels:{
-                        font:{ family:"Poppins", weight:600 },
-                        color:"#052f5c"
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            // Altera a interação global para o ponto individual
+            interaction: {
+                mode: 'nearest',     
+                intersect: true     // Exige que o mouse esteja exatamente sobre a bolinha
+            },
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: {
+                        font: { family: "Poppins", weight: 600, size: 12 },
+                        color: "#052f5c",
+                        padding: 15,
+                        usePointStyle: true, pointStyle: 'circle'
                     }
                 },
-                datalabels:{ display:false }
+            tooltip: {
+                    backgroundColor: "#ffffff",
+                    titleColor: "#052f5c",
+                    bodyColor: "#333",
+                    borderColor: "#e2e6ea",
+                    borderWidth: 1,
+                    
+                    mode: 'nearest',     // 🌟 Foca apenas em 1 item
+                    intersect: true,     // 🌟 Só abre se o mouse tocar na bolinha
+                    position: 'cursor',  // Mantém o balão colado no ponteiro do mouse
+                    
+                    callbacks: {
+                        // O título do balão agora mostra o Filósofo + o Grupo correspondente
+                        title: function(context) {
+                            const autor = context[0].label;
+                            const grupo = context[0].dataset.label;
+                            return `${autor} (${grupo})`;
+                        },
+                        // A linha interna mostra apenas o valor limpo daquela bolinha
+                        label: function(context) {
+                            let valor = context.parsed.r;
+                            let desc = valor >= 0 ? 'Concorda' : 'Discorda';
+                            let intensidade = Math.abs(valor) === 2 ? 'fortemente' : (Math.abs(valor) === 1 ? 'parcialmente' : 'neutro');
+                            if (valor === 0) desc = 'Neutro';
+                            else desc += (intensidade ? ' ' + intensidade : '');
+                            
+                            return 'Valor: ' + valor.toFixed(1) + ' (' + desc + ')';
+                        }
+                    }
+                },
+                datalabels: { display: false }
             },
-
-            scales:{
-                r:{
-                    min:-1,
-                    max:2,
-                    ticks:{ color:"#5b6b7a", backdropColor:"transparent" },
-                    grid:{ color:"#e2e6ea" },
-                    angleLines:{ color:"#e2e6ea" },
-                    pointLabels:{
-                        font:{ family:"Poppins", weight:700 },
-                        color:"#052f5c"
+            
+            // 🌟 3. Altera o efeito visual do Hover do mouse
+            hover: {
+                mode: 'nearest',
+                intersect: true
+            },
+            scales: {
+                r: {
+                    min: -2, max: 2,
+                    ticks: {
+                        color: "#5b6b7a", backdropColor: "transparent", stepSize: 1, showLabelBackdrop: false,
+                        font: { size: 11, weight: '500' },
+                        callback: (valor) => (valor === 2 ? "+2" : (valor === -2 ? "-2" : (valor === 0 ? "0" : valor)))
+                    },
+                    grid: { color: "#dce0e5", lineWidth: 1.2, circular: true },
+                    angleLines: { color: "#dce0e5", lineWidth: 1.2 },
+                    pointLabels: {
+                        font: { family: "Poppins", weight: 700, size: 13 },
+                        color: "#052f5c",
+                        padding: 15 // 🌟 Afasta os nomes ("Kuhn", "Bacon") do círculo para não sumirem nas bordas
                     }
                 }
+            },
+            layout: {
+                padding: { top: 20, bottom: 25, left: 20, right: 20 } //  Aumentou consideravelmente a margem inferior (bottom) para caber o Kuhn acima da legenda
             }
-        }
+        },
+        plugins: [regioesFundoPlugin]
     });
 }
 
-function atualizarRadarChart(filtrado){
+function atualizarRadarChart(filtrado) {
+    if (!radarChart) return;
 
-    if(!radarChart) return;
+    const autores = ["Bacon", "Popper", "Kuhn", "Feyerabend"];
+    const grupos = [
+        "Estudante do IMPA Tech ou UFRJ",
+        "Professor",
+        "Funcionário / Técnico-administrativo"
+    ];
 
-    const autores = ["Bacon","Popper","Kuhn","Feyerabend"];
+    // Fator de exagero (1.0 = sem exagero, 1.6 ~ 2.0 = destaque forte)
+    const FATOR_EXAGERO = 1
 
-    const top20 = [];
-    const mediaArr = [];
-    const bottom20 = [];
-
-    autores.forEach(autor=>{
-
-        const valores = valoresAutor(filtrado, autor);
-
-        top20.push(percentil(valores, 80));
-        mediaArr.push(media(valores));
-        bottom20.push(percentil(valores, 20));
+    const dadosPorGrupo = grupos.map(grupo => {
+        const linhasDoGrupo = filtrado.filter(linha => linha["Você é:"] === grupo);
+        return autores.map(autor => {
+            const valores = valoresAutor(linhasDoGrupo, autor);
+            if (!valores.length) return null;
+            
+            const mediaOriginal = media(valores);
+            
+            // 🔥 APLICA A DISTORÇÃO MATEMÁTICA (HIPÉRBOLE)
+            // Mantém o sinal, mas eleva o módulo ao expoente definido
+            const distortion = Math.sign(mediaOriginal) * Math.pow(Math.abs(mediaOriginal), FATOR_EXAGERO);
+            
+            // Opcional: arredonda para não gerar números quebrados enormes
+            return Math.round(distortion * 100) / 100;
+        });
     });
 
-    radarChart.data.datasets[0].data = top20;
-    radarChart.data.datasets[1].data = mediaArr;
-    radarChart.data.datasets[2].data = bottom20;
+    radarChart.data.datasets[0].data = dadosPorGrupo[0];
+    radarChart.data.datasets[1].data = dadosPorGrupo[1];
+    radarChart.data.datasets[2].data = dadosPorGrupo[2];
 
     radarChart.update();
 }
-
 // Redesenha o boxplot (canvas puro) quando a janela é redimensionada
 window.addEventListener("resize", ()=>{
     if(ultimoFiltrado.length) desenharBoxplot(ultimoFiltrado);
