@@ -287,6 +287,21 @@ svg{
     font-weight:800;
 }
 
+.scatter-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:18px;
+}
+
+.scatter-item{
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:10px;
+    height:230px;
+    position:relative;
+}
+
 /* ---------- cards dos filósofos ---------- */
 
 .filosofos{
