@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>O que é Ciência? | Dashboard da Pesquisa — HU31 Epistemologia da Ciência</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<div class="bg-deco" aria-hidden="true">
+    <span class="dot-grid tl"></span>
+    <span class="dot-grid br"></span>
+    <span class="ring r1"></span>
+    <span class="ring r2"></span>
+</div>
+
+<header class="hero">
+
+    <div class="badge">Disciplina: <strong>Epistemologia da ciência · 2026.1</strong></div>
+
+    <h1 class="hero-title">
+        O QUE É CIÊNCIA?<br>
+        <span class="accent">COMO A COMPREENDEMOS?</span>
+    </h1>
+
+    <p class="hero-sub">
+        Perguntamos, cruzamos as respostas e descobrimos a qual filósofo da ciência
+        cada pessoa mais se aproxima. Explore os resultados da pesquisa abaixo.
+    </p>
+
+    <div class="hero-stats" id="heroStats">
+        <div class="stat">
+            <span class="stat-number" id="statTotal">–</span>
+            <span class="stat-label">respostas</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number">4</span>
+            <span class="stat-label">filósofos</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number" id="statFiltered">–</span>
+            <span class="stat-label">no filtro atual</span>
+        </div>
+    </div>
+
+</header>
+
+<main class="panel">
+
+    <div class="panel-inner">
+
+        <section class="col left">
+
+            <div class="section-head">
+                <span class="pill-icon">🔎</span>
+                <h2>Filtros</h2>
+            </div>
+            <p class="section-hint">Clique em um círculo para isolar o grupo. Clique novamente para voltar ao normal.</p>
+
+            <svg
+                id="graph"
+                viewBox="0 0 1000 900"
+                preserveAspectRatio="xMidYMid meet"
+            ></svg>
+
+        </section>
+
+        <section class="col right">
+
+            <div class="section-head">
+                <span class="pill-icon">📊</span>
+                <h2>Autor Predominante</h2>
+            </div>
+            <p class="section-hint">Quantidade de pessoas mais próximas de cada filósofo, segundo o filtro selecionado.</p>
+
+            <div class="chart-container">
+                <canvas id="chart"></canvas>
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p class="footer-line">SUA PARTICIPAÇÃO FEZ A DIFERENÇA!</p>
+    <p class="footer-sub">Professor: Rafael Beraldo &nbsp;|&nbsp; Auxiliar: Daniel Silva &nbsp;|&nbsp; IMPA Tech</p>
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>
