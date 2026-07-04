@@ -314,7 +314,7 @@ function gerarGrafo() {
     const gruposInfo = grupos.map(grupo => {
 
         const valores = grupo === "Gênero"
-            ? ["Feminino", "Masculino", "Outro"]
+            ? ["Feminino", "Masculino", "Outros"]
             : [
                 ...new Set(
                     dados
