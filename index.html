@@ -9,12 +9,13 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="style.css">
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
 </head>
 
@@ -95,6 +96,98 @@
     </div>
 
 </main>
+
+<section class="panel panel-secondary">
+
+    <div class="panel-inner single">
+
+        <div class="col full">
+
+            <div class="section-head">
+                <span class="pill-icon">📈</span>
+                <h2>Distribuição Percentual de Posicionamento por Autor</h2>
+            </div>
+            <p class="section-hint">Como as respostas se distribuem entre discordância e concordância com cada filósofo, considerando o filtro atual.</p>
+
+            <div class="chart-container tall">
+                <canvas id="chartDistribuicao"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="filosofos">
+
+    <div class="filosofos-head">
+        <h2>Quem são os 4 filósofos?</h2>
+        <p>Cada resposta do questionário aproxima a pessoa de um destes pensadores da ciência.</p>
+    </div>
+
+    <div class="filosofos-grid">
+
+        <article class="filosofo-card">
+            <img class="filosofo-foto" src="img/bacon.png" alt="Retrato de Francis Bacon">
+            <h3 class="filosofo-nome">Francis Bacon <span>(1561 – 1626)</span></h3>
+            <p class="filosofo-bio">
+                Pioneiro do pensamento moderno e do empirismo, Bacon revolucionou a forma de
+                fazer ciência ao propor o método indutivo. Defendia que o conhecimento científico
+                deve ser baseado na observação rigorosa e na experimentação prática, e não em
+                meras especulações teóricas. Sua célebre frase "Saber é poder" reflete a sua visão
+                de que a ciência deve ser uma ferramenta prática para transformar a natureza e
+                melhorar a vida humana.
+            </p>
+            <div class="filosofo-divisor"></div>
+            <p class="filosofo-frase">"Saber é poder"</p>
+        </article>
+
+        <article class="filosofo-card">
+            <img class="filosofo-foto" src="img/popper.png" alt="Retrato de Karl Popper">
+            <h3 class="filosofo-nome">Karl Popper <span>(1902 – 1994)</span></h3>
+            <p class="filosofo-bio">
+                Um dos maiores filósofos da ciência do século XX, Popper propôs o princípio do
+                Falsificacionismo. Para ele, uma teoria só é verdadeiramente científica se puder
+                ser testada e colocada à prova para ser desmentida (falsificada). Defendia que a
+                ciência não progride acumulando verdades absolutas, mas sim eliminando erros,
+                avançando através de conjeturas e refutações em uma perpétua busca pela verdade.
+            </p>
+            <div class="filosofo-divisor"></div>
+            <p class="filosofo-frase">"Uma teoria deve poder ser refutada"</p>
+        </article>
+
+        <article class="filosofo-card">
+            <img class="filosofo-foto" src="img/kuhn.png" alt="Retrato de Thomas Kuhn">
+            <h3 class="filosofo-nome">Thomas Kuhn <span>(1922 – 1996)</span></h3>
+            <p class="filosofo-bio">
+                Famoso por introduzir o conceito de "Paradigma", Kuhn mudou a nossa visão sobre
+                a história da ciência. Ele demonstrou que a ciência não evolui de forma linear e
+                contínua, mas através de Revoluções Científicas. Quando o modelo vigente
+                (paradigma) deixa de explicar certas anomalias, ocorre uma crise que resulta na
+                rutura e na adoção de um paradigma completamente novo.
+            </p>
+            <div class="filosofo-divisor"></div>
+            <p class="filosofo-frase">"A ciência avança através de revoluções"</p>
+        </article>
+
+        <article class="filosofo-card">
+            <img class="filosofo-foto" src="img/feyerabend.png" alt="Retrato de Paul Feyerabend">
+            <h3 class="filosofo-nome">Paul Feyerabend <span>(1924 – 1994)</span></h3>
+            <p class="filosofo-bio">
+                Conhecido pelo seu "anarquismo epistemológico", Feyerabend foi o crítico mais
+                radical das regras científicas rígidas. Na sua obra principal, Contra o Método,
+                ele defende a liberdade total na investigação científica através da máxima:
+                "Tudo vale" (Anything goes). Para ele, a ciência progride de forma mais rica
+                quando não se prende a dogmas ou a um único método definitivo.
+            </p>
+            <div class="filosofo-divisor"></div>
+            <p class="filosofo-frase">"Tudo vale"</p>
+        </article>
+
+    </div>
+
+</section>
 
 <footer class="footer">
     <p class="footer-line">SUA PARTICIPAÇÃO FEZ A DIFERENÇA!</p>
