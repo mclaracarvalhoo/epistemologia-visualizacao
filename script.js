@@ -302,7 +302,7 @@ function gerarGrafo() {
     ];
 
     const yPos = [
-        0,
+        1,
         1000,
         2000
     ];
