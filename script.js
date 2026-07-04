@@ -314,7 +314,7 @@ function gerarGrafo() {
     const gruposInfo = grupos.map(grupo => {
 
         const valores = grupo === "Gênero"
-            ? ["Feminino", "Masculino", "Outros"]
+            ? ["Feminino", "Masculino", "Todos"]   // <-- ALTERADO: Outros → Todos
             : [
                 ...new Set(
                     dados
@@ -397,6 +397,9 @@ function gerarGrafo() {
 
             filtros[grupo].push(item.valor);
 
+            // Cria o nó, marcando se for "Todos" (apenas para Gênero)
+            const isTodos = (grupo === "Gênero" && item.valor === "Todos");
+
             nodes.push({
                 grupo,
                 valor: item.valor,
@@ -404,8 +407,8 @@ function gerarGrafo() {
                 raio: item.raio,
                 ativo: true,
                 x,
-                y
-                // propriedade opcaoGenero removida (não mais necessária)
+                y,
+                isTodos: isTodos   // <-- propriedade para identificar o nó especial
             });
         });
     });
@@ -625,18 +628,81 @@ function desenharVertices() {
     });
 }
 
+// ============================================================
+// LÓGICA DE CLIQUE COM TRATAMENTO ESPECIAL PARA O GRUPO GÊNERO
+// ============================================================
 function toggleNode(node) {
 
     const grupo = node.grupo;
 
+    // ---- TRATAMENTO ESPECIAL PARA GÊNERO ----
+    if (grupo === "Gênero") {
+        const todosNos = nodes.filter(n => n.grupo === "Gênero");
+        const todosNode = todosNos.find(n => n.isTodos);
+        const femininoNode = todosNos.find(n => n.valor === "Feminino");
+        const masculinoNode = todosNos.find(n => n.valor === "Masculino");
+
+        // Se clicou no nó "Todos"
+        if (node.isTodos) {
+            if (node.ativo) {
+                // "Todos" estava ativo → desativar todos (incluindo "Todos")
+                todosNos.forEach(n => {
+                    n.ativo = false;
+                    n.circle.classList.add("node-disabled");
+                });
+            } else {
+                // "Todos" estava inativo → ativar todos (Feminino, Masculino e "Todos")
+                todosNos.forEach(n => {
+                    n.ativo = true;
+                    n.circle.classList.remove("node-disabled");
+                });
+            }
+        } else {
+            // Clicou em Feminino ou Masculino
+            // Se "Todos" estiver ativo, desativá-lo primeiro
+            if (todosNode && todosNode.ativo) {
+                todosNode.ativo = false;
+                todosNode.circle.classList.add("node-disabled");
+            }
+
+            // Agora alterna o estado do nó clicado
+            node.ativo = !node.ativo;
+            if (node.ativo) {
+                node.circle.classList.remove("node-disabled");
+            } else {
+                node.circle.classList.add("node-disabled");
+            }
+
+            // (Opcional) Se ambos Feminino e Masculino ficarem ativos, NÃO ativar "Todos" automaticamente
+        }
+
+        // Monta a lista de valores reais para o filtro
+        const ativos = todosNos.filter(n => n.ativo);
+        let valoresFiltro = [];
+        const temTodos = ativos.some(n => n.isTodos);
+        if (temTodos) {
+            valoresFiltro = ["Feminino", "Masculino", "Outros"]; // inclui todos os valores do CSV
+        } else {
+            if (femininoNode && femininoNode.ativo) valoresFiltro.push("Feminino");
+            if (masculinoNode && masculinoNode.ativo) valoresFiltro.push("Masculino");
+        }
+        filtros[grupo] = valoresFiltro;
+
+        // Atualiza arestas e gráficos
+        atualizarArestas();
+        atualizarGrafico();
+        return;
+    }
+    // ---- FIM DO TRATAMENTO ESPECIAL ----
+
+    // ---- LÓGICA PADRÃO PARA OS DEMAIS GRUPOS ----
     const todos =
         nodes.filter(n => n.grupo === grupo);
 
     const ativos =
         todos.filter(n => n.ativo);
 
-    // Se só existe um ativo e ele foi clicado,
-    // ativa todos novamente.
+    // Se só existe um ativo e ele foi clicado, ativa todos novamente.
     if (ativos.length === 1 && node.ativo) {
 
         todos.forEach(n => {
@@ -645,9 +711,7 @@ function toggleNode(node) {
         });
 
     }
-
-    // Se todos estão ativos,
-    // deixa somente o clicado.
+    // Se todos estão ativos, deixa somente o clicado.
     else if (ativos.length === todos.length) {
 
         todos.forEach(n => {
@@ -663,7 +727,6 @@ function toggleNode(node) {
         });
 
     }
-
     // Caso intermediário
     else {
 
@@ -683,7 +746,6 @@ function toggleNode(node) {
             .map(n => n.valor);
 
     atualizarArestas();
-
     atualizarGrafico();
 }
 
@@ -1187,9 +1249,9 @@ function desenharBoxplot(filtrado) {
 }
 
 /* ==========================================================
-   RADAR COMPARATIVO (Estudantes / Professores / Funcionários)
-   ========================================================== */
-   
+RADAR COMPARATIVO (Estudantes / Professores / Funcionários)
+========================================================== */
+
 // 1. REGISTRA O SEGUIDOR DE CURSOR (Cole isso antes/fora da função criarRadarChart)
 if (Chart && Chart.Tooltip && !Chart.Tooltip.positioners.cursor) {
     Chart.Tooltip.positioners.cursor = function(elements, eventPosition) {
@@ -1406,6 +1468,7 @@ function atualizarRadarChart(filtrado) {
 
     radarChart.update();
 }
+
 // Redesenha o boxplot (canvas puro) quando a janela é redimensionada
 window.addEventListener("resize", () => {
     if (ultimoFiltrado.length) desenharBoxplot(ultimoFiltrado);
