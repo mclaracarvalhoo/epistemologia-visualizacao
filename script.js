@@ -88,6 +88,9 @@ function criarGrafico(){
                     },
                     datalabels:{
                         display:false
+                    },
+                    tooltip:{
+                        enabled:false 
                     }
                 },
 
@@ -187,6 +190,9 @@ function criarGraficoDistribuicao(){
                         formatter:(valor)=>
                             valor >= 5 ? Math.round(valor) + "%" : "",
                         font:{ family:"Poppins", weight:700, size:12 }
+                    },
+                    tooltip:{
+                        enabled:false
                     }
                 },
 
@@ -279,10 +285,10 @@ function calcularRaio(linhas){
     const maiorLinha =
         Math.max(...linhas.map(l => l.length), 1);
 
-    const raioLargura = maiorLinha * 8  + 18;
-    const raioAltura = linhas.length*2 + 30;
+    const raioLargura = maiorLinha * 4.0 + 20;
+    const raioAltura = linhas.length * 10 + 34;
 
-    return Math.max(48, raioLargura, raioAltura);
+    return Math.max(54, raioLargura, raioAltura);
 }
 
 function gerarGrafo(){
@@ -332,7 +338,7 @@ function gerarGrafo(){
         });
 
         const raioMaximo =
-            Math.max(...itens.map(it => it.raio), 48);
+            Math.max(...itens.map(it => it.raio), 54);
 
         const espacamento =
             raioMaximo * 2 + 44;
@@ -414,9 +420,26 @@ function gerarGrafo(){
     generoEstado = { masculino:true, feminino:true, todos:true };
     aplicarFiltroGenero();
 
+    // Recorta o viewBox para caber só o conteúdo (sem sobra de espaço
+    // em branco no topo/embaixo), deixando o grafo maior e mais legível.
+    const primeiroGrupo = gruposInfo[0];
+    const ultimoGrupo = gruposInfo[gruposInfo.length - 1];
+
+    const raioMaxUltimo =
+        Math.max(...ultimoGrupo.itens.map(it => it.raio), 54);
+
+    const topoViewBox =
+        Math.max(10, (yPos[0] - 95) - 40);
+
+    const baseViewBox =
+        yPos[yPos.length - 1] + raioMaxUltimo + 40;
+
+    const alturaViewBox =
+        baseViewBox - topoViewBox;
+
     svg.setAttribute(
         "viewBox",
-        `0 0 ${largura} 900`
+        `0 ${topoViewBox} ${largura} ${alturaViewBox}`
     );
 
     criarArestasAutomaticas();
@@ -572,7 +595,7 @@ function desenharVertices(){
         text.setAttribute("class", "label");
         text.style.pointerEvents = "none";
 
-        const alturaLinha = 30;
+        const alturaLinha = 15.5;
 
         const dyInicial =
             -((node.linhas.length - 1) / 2) * alturaLinha;
@@ -1080,6 +1103,9 @@ function criarScatterCharts(){
                         text:`${autorX} vs ${autorY}`,
                         color:"#052f5c",
                         font:{ family:"Poppins", weight:700, size:12 }
+                    },
+                    tooltip:{
+                        enabled:false  
                     }
                 },
 
