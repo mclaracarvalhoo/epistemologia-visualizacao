@@ -30,7 +30,7 @@
 
 <header class="hero">
 
-    <div class="badge">Disciplina: <strong>Epistemologia da ciência · 2026.1</strong></div>
+    <div class="badge">Disciplina: <strong>HU31 · 2026.1</strong></div>
 
     <h1 class="hero-title">
         O QUE É CIÊNCIA?<br>
@@ -111,6 +111,77 @@
 
             <div class="chart-container tall">
                 <canvas id="chartDistribuicao"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="panel panel-secondary">
+
+    <div class="panel-inner single">
+
+        <div class="col full">
+
+            <div class="section-head">
+                <span class="pill-icon">🎯</span>
+                <h2>Correlação entre Filósofos</h2>
+            </div>
+            <p class="section-hint">Cada ponto é uma pessoa. Mostra como a nota de concordância com um filósofo se relaciona com a de outro (considerando o filtro atual).</p>
+
+            <div class="scatter-grid">
+                <div class="scatter-item"><canvas id="scatterBaconPopper"></canvas></div>
+                <div class="scatter-item"><canvas id="scatterBaconKuhn"></canvas></div>
+                <div class="scatter-item"><canvas id="scatterBaconFeyerabend"></canvas></div>
+                <div class="scatter-item"><canvas id="scatterPopperKuhn"></canvas></div>
+                <div class="scatter-item"><canvas id="scatterPopperFeyerabend"></canvas></div>
+                <div class="scatter-item"><canvas id="scatterKuhnFeyerabend"></canvas></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="panel panel-secondary">
+
+    <div class="panel-inner single">
+
+        <div class="col full">
+
+            <div class="section-head">
+                <span class="pill-icon">📦</span>
+                <h2>Distribuição por Boxplot</h2>
+            </div>
+            <p class="section-hint">Mínimo, máximo, média (linha dourada) e a faixa entre os 20% que menos e os 20% que mais concordaram com cada filósofo.</p>
+
+            <div class="chart-container tall">
+                <canvas id="boxplotCanvas"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="panel panel-secondary">
+
+    <div class="panel-inner single">
+
+        <div class="col full">
+
+            <div class="section-head">
+                <span class="pill-icon">🕸️</span>
+                <h2>Perfil Comparativo dos Filósofos</h2>
+            </div>
+            <p class="section-hint">Clique nos itens da legenda abaixo do gráfico para mostrar ou esconder cada camada.</p>
+
+            <div class="chart-container tall">
+                <canvas id="radarChart"></canvas>
             </div>
 
         </div>
