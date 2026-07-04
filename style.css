@@ -273,7 +273,7 @@ svg{
 
 .label{
     font-family:"Poppins",Arial,sans-serif;
-    font-size:11.5px;
+    font-size: 15px;
     font-weight:600;
     fill:var(--navy);
     text-anchor:middle;

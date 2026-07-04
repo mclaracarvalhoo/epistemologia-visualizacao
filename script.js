@@ -279,8 +279,8 @@ function calcularRaio(linhas){
     const maiorLinha =
         Math.max(...linhas.map(l => l.length), 1);
 
-    const raioLargura = maiorLinha * 3.6 + 18;
-    const raioAltura = linhas.length * 9 + 30;
+    const raioLargura = maiorLinha * 8  + 18;
+    const raioAltura = linhas.length*2 + 30;
 
     return Math.max(48, raioLargura, raioAltura);
 }
@@ -572,7 +572,7 @@ function desenharVertices(){
         text.setAttribute("class", "label");
         text.style.pointerEvents = "none";
 
-        const alturaLinha = 14;
+        const alturaLinha = 30;
 
         const dyInicial =
             -((node.linhas.length - 1) / 2) * alturaLinha;
