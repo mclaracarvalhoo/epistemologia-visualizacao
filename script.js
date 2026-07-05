@@ -314,7 +314,7 @@ function gerarGrafo() {
     const gruposInfo = grupos.map(grupo => {
 
         const valores = grupo === "Gênero"
-            ? ["Feminino", "Masculino", "Todos"]   // <-- ALTERADO: Outros → Todos
+            ? ["Feminino", "Masculino", "Todos"]
             : [
                 ...new Set(
                     dados
@@ -397,7 +397,6 @@ function gerarGrafo() {
 
             filtros[grupo].push(item.valor);
 
-            // Cria o nó, marcando se for "Todos" (apenas para Gênero)
             const isTodos = (grupo === "Gênero" && item.valor === "Todos");
 
             nodes.push({
@@ -408,7 +407,7 @@ function gerarGrafo() {
                 ativo: true,
                 x,
                 y,
-                isTodos: isTodos   // <-- propriedade para identificar o nó especial
+                isTodos: isTodos
             });
         });
     });
@@ -418,15 +417,11 @@ function gerarGrafo() {
     const primeiroGrupo = gruposInfo[0];
     const ultimoGrupo = gruposInfo[gruposInfo.length - 1];
 
-    // Calcula o raio máximo do PRIMEIRO grupo
     const raioMaxPrimeiro = Math.max(
         ...primeiroGrupo.itens.map(it => it.raio),
         54
     );
 
-    // O topo da viewBox é o MENOR valor entre:
-    // 1) uma margem segura para o título (yPos[0] - 95 - 10)
-    // 2) uma margem segura para o círculo inteiro (yPos[0] - raioMaxPrimeiro - 40)
     const topoViewBox = Math.min(
         yPos[0] - raioMaxPrimeiro - 40,
         yPos[0] - 95 - 10
@@ -457,7 +452,8 @@ function criarArestasAutomaticas() {
     const mapa = {};
 
     nodes.forEach(n => {
-
+        // Não incluir o nó "Todos" no mapa, pois ele não existe no CSV
+        if (n.isTodos) return;
         mapa[
             `${n.grupo}|${n.valor}`
         ] = n;
@@ -573,11 +569,9 @@ function desenharVertices() {
         circle.setAttribute("fill", "#ffffff");
         circle.setAttribute("stroke", corGrupo(node.grupo));
         circle.setAttribute("class", "node");
-        // Estilo inline para garantir espessura da borda
         circle.style.strokeWidth = "8px";
         circle.style.stroke = corGrupo(node.grupo);
 
-        // Agora TODOS os nós usam a mesma lógica de clique
         circle.addEventListener(
             "click",
             () => toggleNode(node)
@@ -645,27 +639,35 @@ function toggleNode(node) {
         // Se clicou no nó "Todos"
         if (node.isTodos) {
             if (node.ativo) {
-                // "Todos" estava ativo → desativar todos (incluindo "Todos")
-                todosNos.forEach(n => {
-                    n.ativo = false;
-                    n.circle.classList.add("node-disabled");
-                });
+                // Desativar apenas "Todos", manter Feminino e Masculino ativos (se já estavam)
+                node.ativo = false;
+                node.circle.classList.add("node-disabled");
+                // Garantir que pelo menos um gênero esteja ativo
+                if (!femininoNode.ativo && !masculinoNode.ativo) {
+                    // Se ambos estiverem inativos (caso raro), ativar ambos
+                    femininoNode.ativo = true;
+                    femininoNode.circle.classList.remove("node-disabled");
+                    masculinoNode.ativo = true;
+                    masculinoNode.circle.classList.remove("node-disabled");
+                }
             } else {
-                // "Todos" estava inativo → ativar todos (Feminino, Masculino e "Todos")
-                todosNos.forEach(n => {
-                    n.ativo = true;
-                    n.circle.classList.remove("node-disabled");
-                });
+                // Ativar "Todos" e também ativar Feminino e Masculino (se não estiverem)
+                node.ativo = true;
+                node.circle.classList.remove("node-disabled");
+                femininoNode.ativo = true;
+                femininoNode.circle.classList.remove("node-disabled");
+                masculinoNode.ativo = true;
+                masculinoNode.circle.classList.remove("node-disabled");
             }
         } else {
             // Clicou em Feminino ou Masculino
-            // Se "Todos" estiver ativo, desativá-lo primeiro
-            if (todosNode && todosNode.ativo) {
+            // Se "Todos" estiver ativo, desativá-lo
+            if (todosNode.ativo) {
                 todosNode.ativo = false;
                 todosNode.circle.classList.add("node-disabled");
             }
 
-            // Agora alterna o estado do nó clicado
+            // Alterna o estado do nó clicado
             node.ativo = !node.ativo;
             if (node.ativo) {
                 node.circle.classList.remove("node-disabled");
@@ -673,7 +675,12 @@ function toggleNode(node) {
                 node.circle.classList.add("node-disabled");
             }
 
-            // (Opcional) Se ambos Feminino e Masculino ficarem ativos, NÃO ativar "Todos" automaticamente
+            // Após a alternância, verifica se ambos Feminino e Masculino estão inativos
+            if (!femininoNode.ativo && !masculinoNode.ativo) {
+                // Ambos inativos → reativar o nó clicado (não pode ficar vazio)
+                node.ativo = true;
+                node.circle.classList.remove("node-disabled");
+            }
         }
 
         // Monta a lista de valores reais para o filtro
@@ -681,14 +688,13 @@ function toggleNode(node) {
         let valoresFiltro = [];
         const temTodos = ativos.some(n => n.isTodos);
         if (temTodos) {
-            valoresFiltro = ["Feminino", "Masculino", "Outros"]; // inclui todos os valores do CSV
+            valoresFiltro = ["Feminino", "Masculino", "Outros"];
         } else {
-            if (femininoNode && femininoNode.ativo) valoresFiltro.push("Feminino");
-            if (masculinoNode && masculinoNode.ativo) valoresFiltro.push("Masculino");
+            if (femininoNode.ativo) valoresFiltro.push("Feminino");
+            if (masculinoNode.ativo) valoresFiltro.push("Masculino");
         }
         filtros[grupo] = valoresFiltro;
 
-        // Atualiza arestas e gráficos
         atualizarArestas();
         atualizarGrafico();
         return;
@@ -1252,17 +1258,17 @@ function desenharBoxplot(filtrado) {
 RADAR COMPARATIVO (Estudantes / Professores / Funcionários)
 ========================================================== */
 
-// 1. REGISTRA O SEGUIDOR DE CURSOR (Cole isso antes/fora da função criarRadarChart)
+// 1. REGISTRA O SEGUIDOR DE CURSOR
 if (Chart && Chart.Tooltip && !Chart.Tooltip.positioners.cursor) {
     Chart.Tooltip.positioners.cursor = function(elements, eventPosition) {
         return {
-            x: eventPosition.x + 25, // Joga o balão levemente para a direita da seta do mouse
-            y: eventPosition.y - 30  // Joga o balão levemente para cima da seta do mouse
+            x: eventPosition.x + 25,
+            y: eventPosition.y - 30
         };
     };
 }
 
-// 2. O NOVO PLUGIN ATUALIZADO (Substitua o código do seu plugin por este)
+// 2. PLUGIN DE FUNDO
 const regioesFundoPlugin = {
     id: 'regioesFundo',
     beforeDraw(chart) {
@@ -1273,14 +1279,11 @@ const regioesFundoPlugin = {
         const raioMax = r.getDistanceFromCenterForValue(2);   
 
         ctx.save();
-        // Zona Vermelha
         ctx.beginPath(); ctx.fillStyle = 'rgba(255, 99, 132, 0.11)';
         ctx.arc(centerX, centerY, raioZero, 0, 2 * Math.PI); ctx.fill();
-        // Zona Verde
         ctx.beginPath(); ctx.fillStyle = 'rgba(75, 192, 192, 0.11)';
         ctx.arc(centerX, centerY, raioMax, 0, 2 * Math.PI, false);
         ctx.arc(centerX, centerY, raioZero, 0, 2 * Math.PI, true); ctx.fill();
-        // Linha do Zero
         ctx.beginPath(); ctx.setLineDash([5, 5]); ctx.strokeStyle = '#052f5c';
         ctx.lineWidth = 1.5; ctx.arc(centerX, centerY, raioZero, 0, 2 * Math.PI); ctx.stroke();
         ctx.restore();
@@ -1298,7 +1301,6 @@ const regioesFundoPlugin = {
         ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.lineJoin = 'round';
         const espacamentoLinha = 12;
 
-        // 🌟 TEXTO CONCORDÂNCIA: Movido para a diagonal Superior-Esquerda (Espaço morto)
         ctx.fillStyle = 'rgba(30, 123, 123, 0.75)';
         const distConc = raioZero + (raioMax - raioZero) / 2;
         const posXConc = centerX + Math.cos(Math.PI * 1.28) * distConc;
@@ -1308,7 +1310,6 @@ const regioesFundoPlugin = {
             ctx.strokeText(l, posXConc, y); ctx.fillText(l, posXConc, y);
         });
 
-        // 🌟 TEXTO DISCORDÂNCIA: Movido para a diagonal Inferior-Direita (Espaço morto)
         ctx.fillStyle = 'rgba(179, 58, 83, 0.75)';
         const distDisc = raioZero * 0.6;
         const posXDisc = centerX + Math.cos(Math.PI * 0.28) * distDisc;
@@ -1354,10 +1355,9 @@ function criarRadarChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            // Altera a interação global para o ponto individual
             interaction: {
                 mode: 'nearest',     
-                intersect: true     // Exige que o mouse esteja exatamente sobre a bolinha
+                intersect: true
             },
             plugins: {
                 legend: {
@@ -1375,34 +1375,27 @@ function criarRadarChart() {
                     bodyColor: "#333",
                     borderColor: "#e2e6ea",
                     borderWidth: 1,
-                    
-                    mode: 'nearest',     // Foca apenas em 1 item
-                    intersect: true,     // Só abre se o mouse tocar na bolinha
-                    position: 'cursor',  // Mantém o balão colado no ponteiro do mouse
-                    
+                    mode: 'nearest',
+                    intersect: true,
+                    position: 'cursor',
                     callbacks: {
-                        // O título do balão agora mostra o Filósofo + o Grupo correspondente
                         title: function(context) {
                             const autor = context[0].label;
                             const grupo = context[0].dataset.label;
                             return `${autor} (${grupo})`;
                         },
-                        // A linha interna mostra apenas o valor limpo daquela bolinha
                         label: function(context) {
                             let valor = context.parsed.r;
                             let desc = valor >= 0 ? 'Concorda' : 'Discorda';
                             let intensidade = Math.abs(valor) === 2 ? 'fortemente' : (Math.abs(valor) === 1 ? 'parcialmente' : 'neutro');
                             if (valor === 0) desc = 'Neutro';
                             else desc += (intensidade ? ' ' + intensidade : '');
-                            
                             return 'Valor: ' + valor.toFixed(1) + ' (' + desc + ')';
                         }
                     }
                 },
                 datalabels: { display: false }
             },
-            
-            // 🌟 3. Altera o efeito visual do Hover do mouse
             hover: {
                 mode: 'nearest',
                 intersect: true
@@ -1420,12 +1413,12 @@ function criarRadarChart() {
                     pointLabels: {
                         font: { family: "Poppins", weight: 700, size: 13 },
                         color: "#052f5c",
-                        padding: 15 // 🌟 Afasta os nomes ("Kuhn", "Bacon") do círculo para não sumirem nas bordas
+                        padding: 15
                     }
                 }
             },
             layout: {
-                padding: { top: 20, bottom: 25, left: 20, right: 20 } //  Aumentou consideravelmente a margem inferior (bottom) para caber o Kuhn acima da legenda
+                padding: { top: 20, bottom: 25, left: 20, right: 20 }
             }
         },
         plugins: [regioesFundoPlugin]
@@ -1442,7 +1435,6 @@ function atualizarRadarChart(filtrado) {
         "Funcionário / Técnico-administrativo"
     ];
 
-    // Fator de exagero (1.0 = sem exagero, 1.6 ~ 2.0 = destaque forte)
     const FATOR_EXAGERO = 1
 
     const dadosPorGrupo = grupos.map(grupo => {
@@ -1450,14 +1442,8 @@ function atualizarRadarChart(filtrado) {
         return autores.map(autor => {
             const valores = valoresAutor(linhasDoGrupo, autor);
             if (!valores.length) return null;
-            
             const mediaOriginal = media(valores);
-            
-            // 🔥 APLICA A DISTORÇÃO MATEMÁTICA (HIPÉRBOLE)
-            // Mantém o sinal, mas eleva o módulo ao expoente definido
             const distortion = Math.sign(mediaOriginal) * Math.pow(Math.abs(mediaOriginal), FATOR_EXAGERO);
-            
-            // Opcional: arredonda para não gerar números quebrados enormes
             return Math.round(distortion * 100) / 100;
         });
     });
